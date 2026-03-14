@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>🧨 亲戚称呼计算器 · 过年必备</title>
+    <style>
+        body {
+            background: #fef5e7;
+            font-family: 'Segoe UI', Roboto, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 16px;
+        }
+        .card {
+            max-width: 500px;
+            width: 100%;
+            background: #fff9f0;
+            border-radius: 30px;
+            box-shadow: 0 20px 30px rgba(0,0,0,0.1);
+            padding: 30px 25px;
+            border: 2px solid #f7c35c;
+            text-align: center;
+        }
+        h1 {
+            color: #b3413d;
+            margin-top: 0;
+            font-size: 2.2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        h1 span {
+            font-size: 2.5rem;
+        }
+        .sub {
+            color: #d46b4b;
+            margin-bottom: 25px;
+            font-style: italic;
+        }
+        input {
+            width: 80%;
+            padding: 15px 20px;
+            font-size: 1.2rem;
+            border: 2px solid #f0b27a;
+            border-radius: 60px;
+            outline: none;
+            transition: 0.2s;
+            text-align: center;
+        }
+        input:focus {
+            border-color: #e67e22;
+            box-shadow: 0 0 0 3px rgba(230, 126, 34, 0.2);
+        }
+        button {
+            background: #e67e22;
+            color: white;
+            border: none;
+            border-radius: 60px;
+            padding: 15px 35px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            margin: 20px 0 15px;
+            cursor: pointer;
+            box-shadow: 0 5px 0 #b45f1b;
+            transition: 0.1s;
+        }
+        button:active {
+            transform: translateY(5px);
+            box-shadow: none;
+        }
+        .result-box {
+            background: #fce5cd;
+            border-radius: 20px;
+            padding: 15px;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #a04000;
+            border: 2px dashed #e67e22;
+            margin: 15px 0;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .examples {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 20px 0 10px;
+        }
+        .example-tag {
+            background: #fad7a0;
+            padding: 8px 16px;
+            border-radius: 40px;
+            font-size: 1rem;
+            color: #6b2e1e;
+            cursor: pointer;
+            border: 1px solid #e67e22;
+            transition: 0.2s;
+        }
+        .example-tag:hover {
+            background: #f8c471;
+            transform: scale(1.05);
+        }
+        footer {
+            color: #aa6f4b;
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+    </style>
+</head>
+<body>
+<div class="card">
+    <h1>
+        <span>🧧</span> 亲戚称呼 <span>🧧</span>
+    </h1>
+    <div class="sub">输入关系，比如 “爸爸的哥哥”</div>
+
+    <input type="text" id="relationInput" placeholder="例如：妈妈的弟弟" value="爸爸的爸爸">
+
+    <button id="calcBtn">👉 算一算 👈</button>
+
+    <div class="result-box" id="resultDisplay">爷爷</div>
+
+    <div class="examples">
+        <span class="example-tag" onclick="fillExample('爸爸的爸爸')">爸爸的爸爸</span>
+        <span class="example-tag" onclick="fillExample('妈妈的妈妈')">妈妈的妈妈</span>
+        <span class="example-tag" onclick="fillExample('爸爸的哥哥')">爸爸的哥哥</span>
+        <span class="example-tag" onclick="fillExample('妈妈的弟弟')">妈妈的弟弟</span>
+        <span class="example-tag" onclick="fillExample('爸爸的姐姐的丈夫')">爸爸的姐姐的丈夫</span>
+        <span class="example-tag" onclick="fillExample('妈妈的妹妹的丈夫')">妈妈的妹妹的丈夫</span>
+        <span class="example-tag" onclick="fillExample('丈夫的爸爸')">丈夫的爸爸</span>
+        <span class="example-tag" onclick="fillExample('妻子的妈妈')">妻子的妈妈</span>
+    </div>
+
+    <footer>✨ 点击上面例子试试 ✨</footer>
+</div>
+
+<script>
+    // ---------- 核心关系映射表 ----------
+    // 基础人物称呼 (都是相对于“我”)
+    const base = {
+        "我": "我",
+        "爸爸": "爸爸",
+        "妈妈": "妈妈",
+        "父亲": "爸爸",
+        "母亲": "妈妈",
+        "爹": "爸爸",
+        "娘": "妈妈",
+        "哥哥": "哥哥",
+        "弟弟": "弟弟",
+        "姐姐": "姐姐",
+        "妹妹": "妹妹",
+        "丈夫": "丈夫",
+        "妻子": "妻子",
+        "老公": "丈夫",
+        "老婆": "妻子",
+        "儿子": "儿子",
+        "女儿": "女儿"
+    };
+
+    // 组合关系映射 (当前称呼 + "的" + 关系 → 新称呼)
+    // 为了简化，我们用字典 + 规则实现常见组合
+    const rules = {
+        // 爸爸这边的长辈
+        "爸爸的爸爸": "爷爷",
+        "爸爸的妈妈": "奶奶",
+        "爸爸的哥哥": "伯父",
+        "爸爸的弟弟": "叔叔",
+        "爸爸的姐姐": "姑妈",
+        "爸爸的妹妹": "姑妈",
+        // 妈妈这边的长辈
+        "妈妈的爸爸": "外公",
+        "妈妈的妈妈": "外婆",
+        "妈妈的哥哥": "舅舅",
+        "妈妈的弟弟": "舅舅",
+        "妈妈的姐姐": "姨妈",
+        "妈妈的妹妹": "姨妈",
+        // 配偶的父母
+        "丈夫的爸爸": "公公",
+        "丈夫的妈妈": "婆婆",
+        "妻子的爸爸": "岳父",
+        "妻子的妈妈": "岳母",
+        // 配偶的兄弟姐妹
+        "丈夫的哥哥": "大伯",
+        "丈夫的弟弟": "小叔",
+        "丈夫的姐姐": "大姑",
+        "丈夫的妹妹": "小姑",
+        "妻子的哥哥": "大舅",
+        "妻子的弟弟": "小舅",
+        "妻子的姐姐": "大姨",
+        "妻子的妹妹": "小姨",
+        // 兄弟姐妹的配偶
+        "哥哥的妻子": "嫂子",
+        "弟弟的妻子": "弟媳",
+        "姐姐的丈夫": "姐夫",
+        "妹妹的丈夫": "妹夫",
+        // 父母兄弟姐妹的配偶 (姑父、姨父、伯母、婶婶、舅妈等)
+        "爸爸的哥哥的妻子": "伯母",
+        "爸爸的弟弟的妻子": "婶婶",
+        "爸爸的姐姐的丈夫": "姑父",
+        "爸爸的妹妹的丈夫": "姑父",
+        "妈妈的哥哥的妻子": "舅妈",
+        "妈妈的弟弟的妻子": "舅妈",
+        "妈妈的姐姐的丈夫": "姨父",
+        "妈妈的妹妹的丈夫": "姨父",
+        // 再往上 (爷奶的父母)
+        "爷爷的爸爸": "曾祖父",
+        "爷爷的妈妈": "曾祖母",
+        "奶奶的爸爸": "外曾祖父",
+        "奶奶的妈妈": "外曾祖母",
+        // 简单对称
+        "外公的爸爸": "外曾祖父",
+        "外公的妈妈": "外曾祖母",
+        "外婆的爸爸": "外曾祖父",
+        "外婆的妈妈": "外曾祖母"
+    };
+
+    // 规则里没有覆盖到的，可以进一步通过拆分递归处理
+    function computeRelation(relationStr) {
+        // 去除多余空格，统一“的”分隔符
+        let clean = relationStr.replace(/\s+/g, '').replace(/的+/g, '的');
+        if (clean === "") return "（输入为空）";
+
+        // 如果直接命中规则，直接返回
+        if (rules[clean]) return rules[clean];
+
+        // 如果就是基础称呼
+        if (base[clean]) return base[clean];
+
+        // 尝试递归：找到最后一个“的”，将前面部分先算出结果，再组合最后一个人物
+        let lastIndex = clean.lastIndexOf('的');
+        if (lastIndex === -1) {
+            // 没有“的”，又不是基础词 → 不认识
+            return "未知关系 😵";
+        }
+
+        let prev = clean.substring(0, lastIndex);      // 前面的关系
+        let last = clean.substring(lastIndex + 1);      // 最后一个人物
+
+        let prevResult = computeRelation(prev);         // 递归计算前面部分的结果
+        if (prevResult.startsWith("未知") || prevResult.includes("😵")) return "未知关系";
+
+        // 组合成新的测试字符串，例如 prevResult + "的" + last
+        let combined = prevResult + "的" + last;
+        // 如果组合直接命中规则
+        if (rules[combined]) return rules[combined];
+
+        // 否则尝试将 last 标准化（例如“父亲”转“爸爸”）
+        let lastStd = base[last] || last;  // 如果 last 本身是基础词（哥哥、弟弟等）
+        combined = prevResult + "的" + lastStd;
+        if (rules[combined]) return rules[combined];
+
+        // 最后尝试交换：也许 last 是长辈，需要特殊映射？比如“爸爸的哥哥的爸爸”这种情况
+        // 这里简化，直接返回未知
+        return "未知关系 😵";
+    }
+
+    // 处理输入并显示
+    function calculate() {
+        let input = document.getElementById('relationInput').value.trim();
+        if (input === "") {
+            document.getElementById('resultDisplay').innerText = "输入不能空～";
+            return;
+        }
+        let result = computeRelation(input);
+        document.getElementById('resultDisplay').innerText = result;
+    }
+
+    // 点击例子填充
+    function fillExample(rel) {
+        document.getElementById('relationInput').value = rel;
+        calculate();  // 立即计算
+    }
+
+    // 绑定按钮事件
+    document.getElementById('calcBtn').addEventListener('click', calculate);
+
+    // 输入框支持回车
+    document.getElementById('relationInput').addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') calculate();
+    });
+
+    // 初始显示（默认“爸爸的爸爸”已预填）
+    window.onload = function() {
+        // 保证初始显示正确
+        calculate();
+    }
+</script>
+</body>
+</html>

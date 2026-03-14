@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>节日快乐！</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(145deg, #ffe6f0, #ffd9e8);
+            font-family: '微软雅黑', sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            overflow: hidden;
+        }
+        .card {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(5px);
+            border-radius: 30px;
+            padding: 30px 40px;
+            box-shadow: 0 10px 25px rgba(255, 105, 180, 0.3);
+            max-width: 600px;
+            border: 2px solid white;
+        }
+        h1 {
+            font-size: 3.5em;
+            color: #c44569;
+            margin: 0 0 10px;
+            text-shadow: 2px 2px 0 white;
+        }
+        .heart {
+            font-size: 5em;
+            animation: beat 1s infinite;
+            display: inline-block;
+        }
+        @keyframes beat {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.2); color: #ff6b81; }
+            100% { transform: scale(1); }
+        }
+        .message {
+            font-size: 1.5em;
+            color: #a5697a;
+            margin: 20px 0;
+            border-top: 2px dashed #ffb6c1;
+            padding-top: 20px;
+        }
+        .signature {
+            font-size: 1.2em;
+            color: #8b5f6c;
+            margin-top: 30px;
+            font-style: italic;
+        }
+        /* 飘浮的小爱心 */
+        .floating-hearts span {
+            position: absolute;
+            color: #ffb6c1;
+            font-size: 1.5em;
+            opacity: 0.6;
+            animation: float 6s infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0) rotate(0); opacity: 0.6; }
+            100% { transform: translateY(-100vh) rotate(360deg); opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+<!-- 飘浮的小爱心 -->
+<div class="floating-hearts">
+    <span style="left:10%; animation-delay:0s;">❤️</span>
+    <span style="left:30%; animation-delay:2s;">❤️</span>
+    <span style="left:50%; animation-delay:1s;">❤️</span>
+    <span style="left:70%; animation-delay:3s;">❤️</span>
+    <span style="left:90%; animation-delay:0.5s;">❤️</span>
+</div>
+
+<div class="card">
+    <div class="heart">❤️</div>
+    <h1>女神节快乐！</h1>
+    <div class="message">
+        <!-- 这里写你的祝福，可以改 -->
+        亲爱的妈妈：<br>
+        愿您每天都闪闪发光 ✨<br>
+        感谢您的陪伴与包容～
+    </div>
+    <div class="signature">
+        —— 来自您的小OIer 💻<br>
+        2026.3.8
+    </div>
+</div>
+
+</body>
+</html>

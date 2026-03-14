@@ -1,0 +1,430 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>我是一只OIer</title>
+    <style>
+        body { font-family: Arial; padding: 20px; background: #f0f0f0; }
+        #game { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 10px; }
+        #stats { background: #F9E9CD; padding: 10px; border-radius: 5px; margin-bottom: 20px; }
+        #log { background: black; color: #F9A633; padding: 10px; height: 200px; overflow-y: scroll; font-family: monospace; }
+        button { padding: 10px; margin: 5px; width: 200px; cursor: pointer; }
+    </style>
+</head>
+<body>
+<div id="game">
+    <h2>📚 我是一只OIer</h2>
+    <div id="stats">
+        第 <span id="day">1</span> 周<br>
+        OI能力值: <span id="OIability">0</span>    
+        文化课能力值: <span id="knowability">30</span>    
+        快乐值: <span id="happiness">50</span>    
+        健康值: <span id="healthy">100</span><br>
+        距离下次文化课考试: <span id="dk">20</span> 周<br>
+        距离下一次NOIP: <span id="noipweek">36</span> 周
+    </div>
+    <div id="log">
+        你是一名高中生，也是一名OIer<br>
+        你步入高中的大门，在这里，你要度过漫长的三年生活，成为一名神犇<br><br>
+        漫长的156周开始了！请选择你的行动<br>
+		（上次更新时间：2026.2.19）<br>
+		---------------------------<br>
+    </div>
+    <div style="text-align: center;">
+        <button onclick="choose(1)">上洛谷</button>
+        <button onclick="choose(2)">打Atcoder</button>
+        <button onclick="choose(3)">打CF</button>
+        <button onclick="choose(4)">复习文化课</button>
+        <button onclick="choose(5)">放松</button>
+        <button onclick="choose(6)">去图书馆</button>
+        <button onclick="choose(7)">闲逛社区</button>
+        <button onclick="choose(8)">写作业</button>
+        <button onclick="choose(9)">补觉</button>
+    </div>
+</div>
+
+<script>
+    // ---------- 游戏状态 ----------
+    let day = 1;                 // 当前周数 (1~156)
+    let OIability = 0;
+    let knowability = 30;
+    let happiness = 50;
+    let healthy = 100;
+    let dk = 20;                 // 距离文化课考试周数
+    let noipweek = 36;           // 距离NOIP周数 (第一次在36周后，与界面一致)
+    let lastnoipscore = 0;       // 上一次NOIP成绩(仅记录)
+    let flag1 = 1;               // 神犇提示标记
+    let flag2 = 1;               // 文化课太差提示标记
+    let doOI = 0;                // 本周是否进行了OI相关活动
+    let dokn = 0;                // 本周是否进行了文化课相关活动
+
+    // ---------- 随机事件库 ----------
+    const events = [
+        { desc: "电脑炸了，被迫看书。。。快乐值-2，OI能力+2", effects: {happiness: -2, OIability: 2} },
+        { desc: "文化课老师拖堂，没时间打OI。快乐值-4，OI能力-1，健康-3", effects: {happiness: -4, OIability: -1, healthy: -3} },
+        { desc: "在回家的路上捡到了1毛钱!快乐值+5", effects: {happiness: 5} },
+        { desc: "今天状态特好，获得夸奖。快乐值+10，OI能力+2，文化课能力+2", effects: {happiness: 10, OIability: 2, knowability: 2} },
+        { desc: "逛博客时看到dalao的学习笔记，膜拜dalao，OI能力+4，快乐值-1", effects: {OIability: 4, happiness: -1} },
+        { desc: "打比赛遇到原题！直接AK！快乐值+10", effects: {happiness: 10} },
+        { desc: "突然领悟了一种算法，可是掌握的不好。。。OI能力+2，快乐值-2", effects: {OIability: 2, happiness: -2} },
+        { desc: "洛谷日报刊登了你的题解！OI能力+5，快乐值+8", effects: {OIability: 5, happiness: 8} },
+        { desc: "你被教练拉去给学弟学妹讲课，OI能力+3，快乐值+2，健康-2", effects: {OIability: 3, happiness: 2, healthy: -2} },
+        { desc: "在机房发现一本上古秘籍《算法竞赛入门经典》，OI能力+6，健康-1", effects: {OIability: 6, healthy: -1} },
+        { desc: "深夜打CF， rating暴涨！OI能力+8，快乐值+5，健康-4", effects: {OIability: 8, happiness: 5, healthy: -4} },
+        { desc: "和同学联机打游戏，快乐爆炸！快乐值+12，OI能力-2，健康-2", effects: {happiness: 12, OIability: -2, healthy: -2} },
+        { desc: "你成功AC了一道紫题，兴奋得睡不着。OI能力+4，快乐值+6，健康-3", effects: {OIability: 4, happiness: 6, healthy: -3} },
+        { desc: "家里来了亲戚家的孩子，被迫陪玩一整天。快乐值+3，OI能力-3，健康-1", effects: {happiness: 3, OIability: -3, healthy: -1} },
+        { desc: "你写的题解被洛谷加精了！快乐值+15", effects: {happiness: 15} },
+        { desc: "Codeforces炸了，没法比赛。快乐值-5，OI能力+0", effects: {happiness: -5} },
+        { desc: "在知乎回答了一个OI问题，获得百赞。快乐值+10，OI能力+2", effects: {happiness: 10, OIability: 2} },
+        { desc: "电脑蓝屏，代码没保存……OI能力-5，快乐值-10", effects: {OIability: -5, happiness: -10} },
+        { desc: "你的博客被dalao转载了！OI能力+3，快乐值+8", effects: {OIability: 3, happiness: 8} },
+        { desc: "参加洛谷月赛，成功卫冕！OI能力+10，快乐值+10，健康-3", effects: {OIability: 10, happiness: 10, healthy: -3} },
+        { desc: "发现一个OJ的bug，提交了反馈。OI能力+2，快乐值+5", effects: {OIability: 2, happiness: 5} },
+        { desc: "感冒了，头晕眼花。健康-5，OI能力-2，快乐值-3", effects: {healthy: -5, OIability: -2, happiness: -3} },
+        { desc: "家长给你买了新电脑！OI能力+0，快乐值+20，健康+0", effects: {happiness: 20} },
+        { desc: "你被选为学校信息学竞赛队长！OI能力+5，快乐值+5，健康-2", effects: {OIability: 5, happiness: 5, healthy: -2} },
+        { desc: "期末考试临近，不得不暂停OI。文化课能力+8，OI能力-3，快乐值-4", effects: {knowability: 8, OIability: -3, happiness: -4} },
+        { desc: "在食堂偶遇大神，被指点迷津。OI能力+6，快乐值+4", effects: {OIability: 6, happiness: 4} },
+        { desc: "熬夜看番，第二天没精神。健康-4，快乐值+5，OI能力-1", effects: {healthy: -4, happiness: 5, OIability: -1} },
+        { desc: "你收到了一封来自CCF的感谢信。快乐值+10", effects: {happiness: 10} },
+        { desc: "数学课上突然想到一道题的优化，OI能力+3，文化课能力+1", effects: {OIability: 3, knowability: 1} },
+        { desc: "你的电脑被黑客攻击，资料丢失。OI能力-8，快乐值-10", effects: {OIability: -8, happiness: -10} },
+        { desc: "你帮助同学解决了一道难题，收获了友谊。快乐值+8", effects: {happiness: 8} },
+        { desc: "发现学校图书馆有《算法导论》，借来研读。OI能力+5，健康-2", effects: {OIability: 5, healthy: -2} },
+    ];
+
+    // ---------- 辅助函数 ----------
+    function clamp(value, min, max) {
+        return Math.min(Math.max(value, min), max);
+    }
+
+    function clampAll() {
+        OIability = clamp(OIability, 0, 100);
+        knowability = clamp(knowability, 0, 100);
+        happiness = clamp(happiness, 0, 100);
+        healthy = clamp(healthy, 0, 100);
+    }
+
+    function updateDisplay() {
+        document.getElementById('day').textContent = day;
+        document.getElementById('OIability').textContent = OIability;
+        document.getElementById('knowability').textContent = knowability;
+        document.getElementById('happiness').textContent = happiness;
+        document.getElementById('healthy').textContent = healthy;
+        document.getElementById('dk').textContent = dk;
+        document.getElementById('noipweek').textContent = noipweek;
+    }
+
+    function addLog(msg) {
+        let log = document.getElementById('log');
+        log.innerHTML += msg + '<br>';
+        log.scrollTop = log.scrollHeight;
+    }
+
+    // ---------- 结局判定 ----------
+    function checkGameOver() {
+        if (day > 156) {   // 高中三年共156周
+            addLog("══════════════════════════");
+            addLog("高中三年结束了！你即将毕业……");
+            if (OIability >= 95) {
+                addLog("🎉 你已成为一代神犇，AK IOI！");
+            } else if (OIability >= 70) {
+                addLog("👍 你的OI能力突飞猛进，省队预备！");
+            } else if (OIability >= 40) {
+                addLog("📚 你有所进步，但还需努力。");
+            } else {
+                addLog("😢 这三年好像什么都没做……");
+            }
+            if (knowability >= 80) {
+                addLog("同时，你的文化课也名列前茅。");
+            } else if (knowability <= 20) {
+                addLog("但你的文化课一落千丈，等着挨批吧。");
+            }
+            if (happiness >= 80) {
+                addLog("你度过了一个非常愉快的高中！");
+            } else if (happiness <= 20) {
+                addLog("这三年你过得很压抑……");
+            }
+            if (healthy <= 30) {
+                addLog("身体是革命的本钱，你病倒了。");
+            }
+            addLog("欢迎下次再玩~");
+            return true;
+        }
+        if (happiness <= 0) {
+            addLog("快乐值归零，你放弃了OI...");
+            addLog("😭 游戏结束");
+            return true;
+        }
+        if (OIability >= 100 && flag1) {
+            addLog("OI能力值突破100！你成为了神犇！");
+            addLog("🎉 提前达成目标，可以专练文化课了！");
+            flag1 = 0;
+        }
+        if (knowability <= 5 && flag2) {
+            addLog("你的文化课太差了，因此你不得不放弃了OI...");
+            addLog("😫 被家长强制退竞");
+            flag2 = 0;
+        }
+        if (healthy <= 0) {
+            addLog("你的身体最终撑不住披星戴月，住进了医院...");
+            addLog("🏥 好好养病吧");
+            return true;
+        }
+        return false;
+    }
+
+    // ---------- NOIP事件 (占用一周，无其他行动) ----------
+    function noipEvent() {
+        let msg = "";
+        if (OIability >= 80) {
+            happiness += 20;
+            OIability += 5;
+            msg = "你取得了NOIP一等奖！快乐+20，OI能力+5";
+        } else if (OIability >= 60) {
+            happiness += 10;
+            OIability += 3;
+            msg = "你取得了NOIP二等奖，快乐+10，OI能力+3";
+        } else if (OIability >= 40) {
+            happiness += 5;
+            msg = "你取得了NOIP三等奖，快乐+5";
+        } else {
+            happiness -= 10;
+            msg = "NOIP爆零了，快乐-10";
+        }
+        addLog("🏆 " + msg);
+        lastnoipscore = OIability;   // 记录本次成绩（简化）
+        clampAll();
+
+        // 重置NOIP倒计时（每年一次，约36周后，高中约三次）
+        noipweek = 36;
+
+        // 标记本周参与了OI活动（避免遗忘惩罚）
+        doOI = 1;
+        dokn = 0;   // 没有进行文化课学习
+
+        // 时间推进：这一周过去了
+        day++;
+        dk--;
+        if (dk < 0) dk = 0;
+
+        updateDisplay();
+    }
+
+    // ---------- 文化课考试事件 (占用一周，无其他行动) ----------
+    function examEvent() {
+        // 考前额外事件（原版逻辑）
+        if (knowability < 50) {
+            happiness -= 5;
+            knowability += 4;
+            addLog("因为你以前考得太差，班主任找你培训，快乐-5，文化课能力+4");
+        }
+        let passRate = knowability / 100;
+        let win = Math.random() < passRate;
+        if (win) {
+            happiness += 15;
+            addLog("考得不错，班主任给你发了个奖状！快乐+15");
+        } else {
+            happiness -= 13;
+            addLog("烤糊了，班主任找你谈话，快乐-13");
+        }
+        clampAll();
+
+        // 标记本周参与了文化课活动
+        dokn = 1;
+        doOI = 0;
+
+        // 重置考试倒计时
+        dk = 20;
+
+        // 时间推进
+        day++;
+        if (noipweek > 0) noipweek--;
+
+        updateDisplay();
+    }
+
+    // ---------- 主要行动选择 ----------
+    function choose(opt) {
+        if (checkGameOver()) return;
+
+        // ----- 1. 优先处理考试 (考试周无法做其他事) -----
+        if (dk === 0) {
+            examEvent();
+            checkGameOver();
+            return;
+        }
+
+        // ----- 2. 处理NOIP考试 -----
+        if (noipweek === 0) {
+            noipEvent();
+            checkGameOver();
+            return;
+        }
+
+        // ----- 3. 正常周：执行玩家选择 -----
+        let lucky = Math.random() < 0.2;  // 行动内的额外小运气
+
+        switch(opt) {
+            case 1: // 上洛谷
+                OIability += 5;
+                happiness -= 2;
+                doOI = 1;
+                addLog("你刷了3道题，OI能力+5，快乐-2");
+                if (lucky) {
+                    happiness += 5;
+                    addLog("发现一道水题！快乐值+5");
+                }
+                break;
+            case 2: // 打Atcoder
+                OIability += 6;
+                healthy -= 1;
+                doOI = 1;
+                let contest = OIability <= 20 ? "ABC" : (OIability <= 50 ? "ARC" : "AGC");
+                addLog(`你打完${contest}后，感觉脑袋空荡荡的。。。OI能力+6，健康-1`);
+                if (lucky) {
+                    happiness += 10;
+                    addLog("这周的好简单啊！快乐值+10");
+                }
+                break;
+            case 3: // 打Codeforces
+                OIability += 5;
+                healthy -= 2;
+                doOI = 1;
+                addLog("你打了Codeforces，OI能力+5，健康-2");
+                if (lucky) {
+                    happiness -= 3;
+                    let div = "Div.2";
+                    if (OIability <= 10) div = "Div.4";
+                    else if (OIability <= 20) div = "Div.3";
+                    else if (OIability <= 70) div = "Div.2";
+                    else div = "Div.1";
+                    addLog(`${div}好难，快乐值-3`);
+                }
+                break;
+            case 4: // 复习文化课
+                knowability += 6;
+                happiness -= 3;
+                dokn = 1;
+                addLog("你复习了一天的文化课，文化课能力+6，快乐值-3");
+                if (lucky) {
+                    knowability += 3;
+                    addLog("突然觉悟了一道难题！文化课能力+3");
+                }
+                break;
+            case 5: // 放松
+                OIability -= 1;
+                happiness += 3;
+                healthy -= 2;
+                addLog("你出门玩了一整天，OI能力-1，快乐+3，健康-2");
+                if (lucky) {
+                    happiness += 2;
+                    addLog("玩得非常开心，快乐+2");
+                }
+                break;
+            case 6: // 去图书馆
+                knowability += 4;
+                happiness += 3;
+                dokn = 1;
+                addLog("在图书馆学习了许多知识，文化课能力+4，快乐值+3");
+                if (lucky) {
+                    OIability += 2;
+                    addLog("找到了《算法导论》，OI能力+2");
+                }
+                break;
+            case 7: // 闲逛社区
+                happiness += 5;
+                addLog("看到别人的水文，快乐值+5");
+                if (lucky) {
+                    happiness -= 3;
+                    healthy -= 2;
+                    addLog("与别人激情对线，快乐值-3，健康值-2");
+                }
+                break;
+            case 8: // 写作业
+                happiness -= 2;
+                knowability += 4;
+                dokn = 1;
+                addLog("你埋头苦写，有些疲惫，快乐-2，文化课能力+4");  // 修正描述与效果一致
+                if (lucky) {
+                    happiness += 2;
+                    addLog("早早写完了，快乐+2");
+                }
+                break;
+            case 9: // 补觉 
+                healthy += 8;
+                happiness += 2;
+                addLog("你美美地补了一觉，健康+8，快乐+2");
+                if (lucky) {
+                    happiness += 3;
+                    addLog("梦见AK IOI，快乐+3");
+                }
+                break;
+            default:
+                addLog("未知行动，啥也没干");
+        }
+
+        // 边界控制 (行动后立即限制)
+        clampAll();
+
+        // ----- 4. 随机事件（20%触发库内事件）-----
+        if (Math.random() < 0.2) {
+            let ev = events[Math.floor(Math.random() * events.length)];
+            addLog("✨ 机遇：" + ev.desc);
+            if (ev.effects.OIability) OIability += ev.effects.OIability;
+            if (ev.effects.knowability) knowability += ev.effects.knowability;
+            if (ev.effects.happiness) happiness += ev.effects.happiness;
+            if (ev.effects.healthy) healthy += ev.effects.healthy;
+            clampAll();
+        }
+
+        // ----- 5. 特殊事件：省队邀请（OI能力≥90时0.1%概率触发）-----
+        if (OIability >= 95 && Math.random() < 0.001) {
+            OIability += 10;
+            happiness += 10;
+            addLog("🎉 你收到了省队选拔邀请！OI能力+10，快乐值+10");
+            clampAll();
+        }
+
+        // ----- 6. 每周自然消耗与遗忘机制 -----
+        // 每周固定减少2点快乐（模拟日常压力）
+        happiness -= 2;
+        // 如果本周没有进行OI活动，可能遗忘（随机0~1点）
+        if (!doOI) {
+            let lose = Math.floor(Math.random() * 2);  // 0或1
+            if (lose > 0) {
+                OIability -= lose;
+                addLog(`由于疏于练习，OI能力-${lose}`);
+            }
+        }
+        // 如果本周没有进行文化课活动，可能遗忘
+        if (!dokn) {
+            let lose = Math.floor(Math.random() * 2);
+            if (lose > 0) {
+                knowability -= lose;
+                addLog(`由于没有复习，文化课能力-${lose}`);
+            }
+        }
+        // 重置本周活动标记
+        doOI = 0;
+        dokn = 0;
+
+        // 边界限制
+        clampAll();
+
+        // ----- 7. 时间推进：周数增加，倒计时减少 -----
+        day++;
+        dk--;
+        if (dk < 0) dk = 0;
+        if (noipweek > 0) noipweek--;
+
+        updateDisplay();
+        checkGameOver();
+    }
+
+    // 初始化显示
+    updateDisplay();
+</script>
+</body>
+</html>

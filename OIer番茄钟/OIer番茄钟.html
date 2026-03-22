@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>OI番茄钟 · AC模式</title>
+    <style>
+        body {
+            background: #0a0f0f;
+            color: #0f0;
+            font-family: monospace;
+            text-align: center;
+            padding-top: 80px;
+        }
+        .timer {
+            font-size: 5em;
+            margin: 20px;
+        }
+        .mode {
+            font-size: 2em;
+            margin: 10px;
+        }
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="timer" id="timer">25:00</div>
+    <div class="mode" id="mode">AC模式</div>
+    <button id="startBtn">开始</button>
+    <button id="resetBtn">重置</button>
+
+    <script>
+        let timeLeft = 25 * 60; // seconds
+        let mode = 'work'; // work or rest
+        let interval = null;
+
+        const timerElem = document.getElementById('timer');
+        const modeElem = document.getElementById('mode');
+
+        function updateDisplay() {
+            let mins = Math.floor(timeLeft / 60);
+            let secs = timeLeft % 60;
+            timerElem.innerText = `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+        }
+
+        function switchMode() {
+            if (mode === 'work') {
+                mode = 'rest';
+                timeLeft = 5 * 60;
+                modeElem.innerText = 'Debug模式';
+            } else {
+                mode = 'work';
+                timeLeft = 25 * 60;
+                modeElem.innerText = 'AC模式';
+            }
+            updateDisplay();
+            const jokes = ["专注结束！休息一下吧 🧠", "休息结束！继续AC 💪"];
+            alert(mode === 'work' ? jokes[1] : jokes[0]);
+        }
+
+        function startTimer() {
+            if (interval) clearInterval(interval);
+            interval = setInterval(() => {
+                if (timeLeft <= 0) {
+                    clearInterval(interval);
+                    switchMode();
+                    startTimer(); // 自动下一轮
+                } else {
+                    timeLeft--;
+                    updateDisplay();
+                }
+            }, 1000);
+        }
+
+        function resetTimer() {
+            if (interval) clearInterval(interval);
+            mode = 'work';
+            timeLeft = 25 * 60;
+            modeElem.innerText = 'AC模式';
+            updateDisplay();
+        }
+
+        document.getElementById('startBtn').onclick = startTimer;
+        document.getElementById('resetBtn').onclick = resetTimer;
+        updateDisplay();
+    </script>
+</body>
+</html>

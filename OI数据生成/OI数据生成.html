@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>OI数据生成器</title>
+    <style>
+        body {
+            background: #efe;
+            color: #0f0;
+            font-family: monospace;
+            padding: 20px;
+        }
+        .box {
+            background: #1a1a1a;
+            border: 2px solid #0f0;
+            padding: 20px;
+            margin: 20px auto;
+            width: 80%;
+        }
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 8px 16px;
+            margin: 5px;
+            cursor: pointer;
+        }
+        textarea {
+            width: 100%;
+            height: 200px;
+            background: #000;
+            color: #0f0;
+            font-family: monospace;
+            border: 1px solid #0f0;
+        }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h2>随机数组生成器</h2>
+        <label>数量 n: <input type="number" id="n_arr" value="10"></label>
+        <label>最小值: <input type="number" id="min_arr" value="1"></label>
+        <label>最大值: <input type="number" id="max_arr" value="100"></label>
+        <button id="genArr">生成数组</button>
+        <textarea id="arrOut" readonly></textarea>
+    </div>
+    <div class="box">
+        <h2>随机树生成器 (点数n, 边数n-1)</h2>
+        <label>点数 n: <input type="number" id="n_tree" value="5"></label>
+        <button id="genTree">生成树 (邻接表格式)</button>
+        <textarea id="treeOut" readonly></textarea>
+    </div>
+    <div class="box">
+        <h2>随机图生成器</h2>
+        <label>点数 n: <input type="number" id="n_graph" value="5"></label>
+        <label>边数 m: <input type="number" id="m_graph" value="10"></label>
+        <button id="genGraph">生成图 (边列表)</button>
+        <textarea id="graphOut" readonly></textarea>
+    </div>
+    <script>
+        function randomInt(min, max) {
+            return Math.floor(Math.random() * (max - min + 1) + min);
+        }
+        document.getElementById('genArr').onclick = () => {
+            let n = parseInt(document.getElementById('n_arr').value);
+            let min = parseInt(document.getElementById('min_arr').value);
+            let max = parseInt(document.getElementById('max_arr').value);
+            let arr = [];
+            for (let i=0; i<n; i++) arr.push(randomInt(min, max));
+            document.getElementById('arrOut').value = arr.join(' ');
+        };
+        document.getElementById('genTree').onclick = () => {
+            let n = parseInt(document.getElementById('n_tree').value);
+            let edges = [];
+            // 使用 Prufer 序列生成随机树
+            let prufer = [];
+            for (let i=0; i<n-2; i++) prufer.push(randomInt(1, n));
+            let degree = new Array(n+1).fill(1);
+            for (let v of prufer) degree[v]++;
+            let ptr = 1;
+            while (ptr <= n && degree[ptr] !== 1) ptr++;
+            let leaf = ptr;
+            for (let v of prufer) {
+                edges.push([leaf, v]);
+                degree[leaf]--;
+                degree[v]--;
+                if (degree[v] === 1 && v < leaf) leaf = v;
+                else {
+                    ptr++;
+                    while (ptr <= n && degree[ptr] !== 1) ptr++;
+                    leaf = ptr;
+                }
+            }
+            edges.push([leaf, n]);
+            let out = `${n}\n`;
+            for (let e of edges) out += `${e[0]} ${e[1]}\n`;
+            document.getElementById('treeOut').value = out;
+        };
+        document.getElementById('genGraph').onclick = () => {
+            let n = parseInt(document.getElementById('n_graph').value);
+            let m = parseInt(document.getElementById('m_graph').value);
+            let edges = new Set();
+            while (edges.size < m) {
+                let u = randomInt(1, n);
+                let v = randomInt(1, n);
+                if (u !== v) edges.add(`${u} ${v}`);
+            }
+            let out = `${n} ${m}\n`;
+            for (let e of edges) out += e + '\n';
+            document.getElementById('graphOut').value = out;
+        };
+    </script>
+</body>
+</html>

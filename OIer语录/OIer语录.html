@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>OI语录 · 今日梗点</title>
+    <style>
+        body {
+            background: #1e1e2f;
+            font-family: monospace;
+            text-align: center;
+            padding: 50px;
+            color: #0f0;
+        }
+        .card {
+            background: #2a2a3a;
+            border: 2px solid #0f0;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 600px;
+            margin: auto;
+        }
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 20px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>⚡ OIer 语录 ⚡</h1>
+        <p id="joke">加载中...</p>
+        <button onclick="newJoke()">再来一个梗</button>
+    </div>
+    <script>
+        const jokes = [
+            "十年OI一场空，不开long long见祖宗。",
+            "SPFA：它死了。",
+            "关于SPFA，它死了。",
+            "I AK IOI",
+            "%%% 神犇 %%%",
+            "这题用DP，显然。",
+            "暴力出奇迹，骗分过样例。",
+            "洛谷，启动！",
+            "AC自动机 → TLE自动机",
+            "今天你又爆零了吗？",
+            "Dijkstra 保佑我 AC",
+            "我的头发和AC数成反比",
+            "提交前拜一拜高德纳",
+            "这题是红题？我做了两小时...",
+            "能贪心绝不DP",
+            "能Floyd绝不Dijkstra",
+            "加边！加边！加边！"
+        ];
+        function newJoke() {
+            const idx = Math.floor(Math.random() * jokes.length);
+            document.getElementById('joke').innerText = jokes[idx];
+        }
+        newJoke();
+    </script>
+</body>
+</html>

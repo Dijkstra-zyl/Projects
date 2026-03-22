@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>AC进度条 · OIer的每日勋章</title>
+    <style>
+        body {
+            background: #0a0f0f;
+            font-family: monospace;
+            text-align: center;
+            padding-top: 80px;
+            color: #0f0;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            background: #1a1f1f;
+            border: 2px solid #0f0;
+            border-radius: 20px;
+            padding: 30px;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #2a2f2f;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: #0f0;
+            transition: width 0.3s;
+        }
+        button {
+            background: #0f0;
+            color: #0a0f0f;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .dino {
+            font-size: 3em;
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="dino">🦖</div>
+        <h1>OIer AC 进度条</h1>
+        <p>本周目标：15题</p>
+        <div class="progress-bar">
+            <div class="progress-fill" id="fill"></div>
+        </div>
+        <p id="count">本周已AC：0题</p>
+        <button id="addBtn">+1 AC</button>
+        <button id="resetBtn">重置本周</button>
+    </div>
+
+    <script>
+        const STORAGE_KEY = 'ac_weekly';
+        const TARGET = 15;
+        let weeklyCount = 0;
+
+        function loadData() {
+            const saved = localStorage.getItem(STORAGE_KEY);
+            if (saved) weeklyCount = parseInt(saved) || 0;
+            updateUI();
+        }
+
+        function saveData() {
+            localStorage.setItem(STORAGE_KEY, weeklyCount);
+        }
+
+        function updateUI() {
+            const percent = Math.min(100, (weeklyCount / TARGET) * 100);
+            document.getElementById('fill').style.width = percent + '%';
+            document.getElementById('count').innerText = `本周已AC：${weeklyCount}题`;
+        }
+
+        function addAC() {
+            weeklyCount++;
+            saveData();
+            updateUI();
+        }
+
+        function resetWeek() {
+            weeklyCount = 0;
+            saveData();
+            updateUI();
+        }
+
+        document.getElementById('addBtn').onclick = addAC;
+        document.getElementById('resetBtn').onclick = resetWeek;
+        loadData();
+    </script>
+</body>
+</html>

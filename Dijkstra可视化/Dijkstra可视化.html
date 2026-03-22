@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Dijkstra 可视化 · 最短路径模拟</title>
+    <style>
+        body {
+            background: #111;
+            font-family: monospace;
+            color: #0f0;
+            text-align: center;
+        }
+        canvas {
+            background: #1a1a1a;
+            border: 2px solid #0f0;
+            margin: 20px;
+        }
+        button {
+            background: #0f0;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            margin: 5px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .info {
+            margin: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Dijkstra 模拟器 · 最短路径演示</h2>
+    <canvas id="graphCanvas" width="600" height="400"></canvas>
+    <div class="info">
+        <button id="runBtn">运行 Dijkstra</button>
+        <button id="resetBtn">重置</button>
+        <p id="result">点击节点设置起点，再点击设置终点，然后运行。</p>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('graphCanvas');
+        const ctx = canvas.getContext('2d');
+        const nodes = [
+            { x: 100, y: 100, label: 'A' },
+            { x: 300, y: 80, label: 'B' },
+            { x: 500, y: 150, label: 'C' },
+            { x: 200, y: 250, label: 'D' },
+            { x: 400, y: 300, label: 'E' },
+            { x: 100, y: 350, label: 'F' }
+        ];
+        const edges = [
+            { from: 0, to: 1, weight: 4 },
+            { from: 0, to: 3, weight: 2 },
+            { from: 1, to: 2, weight: 5 },
+            { from: 1, to: 4, weight: 1 },
+            { from: 2, to: 4, weight: 2 },
+            { from: 2, to: 5, weight: 3 },
+            { from: 3, to: 4, weight: 6 },
+            { from: 4, to: 5, weight: 1 }
+        ];
+        let startNode = null;
+        let endNode = null;
+        let distances = [];
+        let prev = [];
+        let visited = [];
+
+        function drawGraph() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            // 画边
+            ctx.beginPath();
+            ctx.strokeStyle = '#888';
+            for (let e of edges) {
+                let p1 = nodes[e.from];
+                let p2 = nodes[e.to];
+                ctx.moveTo(p1.x, p1.y);
+                ctx.lineTo(p2.x, p2.y);
+                ctx.stroke();
+                // 权值
+                let midX = (p1.x + p2.x)/2;
+                let midY = (p1.y + p2.y)/2;
+                ctx.fillStyle = '#0f0';
+                ctx.fillText(e.weight, midX, midY);
+            }
+            // 画节点
+            for (let i = 0; i < nodes.length; i++) {
+                let n = nodes[i];
+                ctx.beginPath();
+                ctx.arc(n.x, n.y, 20, 0, 2*Math.PI);
+                ctx.fillStyle = i === startNode ? '#0f0' : (i === endNode ? '#f0f' : '#333');
+                ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.fillText(n.label, n.x-5, n.y+5);
+            }
+        }
+
+        canvas.addEventListener('click', (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            for (let i = 0; i < nodes.length; i++) {
+                const dx = mouseX - nodes[i].x;
+                const dy = mouseY - nodes[i].y;
+                if (dx*dx + dy*dy < 400) {
+                    if (startNode === null) startNode = i;
+                    else if (endNode === null) endNode = i;
+                    else { startNode = i; endNode = null; }
+                    drawGraph();
+                    break;
+                }
+            }
+        });
+
+        function dijkstra() {
+            if (startNode === null || endNode === null) {
+                document.getElementById('result').innerText = '请先选择起点和终点！';
+                return;
+            }
+            const n = nodes.length;
+            distances = new Array(n).fill(Infinity);
+            prev = new Array(n).fill(-1);
+            visited = new Array(n).fill(false);
+            distances[startNode] = 0;
+            for (let i = 0; i < n; i++) {
+                let u = -1;
+                for (let j = 0; j < n; j++) {
+                    if (!visited[j] && (u === -1 || distances[j] < distances[u])) u = j;
+                }
+                if (distances[u] === Infinity) break;
+                visited[u] = true;
+                for (let e of edges) {
+                    let v = -1;
+                    if (e.from === u) v = e.to;
+                    if (e.to === u) v = e.from;
+                    if (v !== -1 && !visited[v]) {
+                        let alt = distances[u] + e.weight;
+                        if (alt < distances[v]) {
+                            distances[v] = alt;
+                            prev[v] = u;
+                        }
+                    }
+                }
+            }
+            let path = [];
+            for (let at = endNode; at !== -1; at = prev[at]) path.push(at);
+            path.reverse();
+            let pathStr = path.map(i => nodes[i].label).join(' → ');
+            document.getElementById('result').innerHTML = `最短距离: ${distances[endNode]}<br>路径: ${pathStr}`;
+        }
+
+        function reset() {
+            startNode = null;
+            endNode = null;
+            drawGraph();
+            document.getElementById('result').innerHTML = '点击节点设置起点，再设置终点，然后运行。';
+        }
+
+        document.getElementById('runBtn').onclick = dijkstra;
+        document.getElementById('resetBtn').onclick = reset;
+        drawGraph();
+    </script>
+</body>
+</html>

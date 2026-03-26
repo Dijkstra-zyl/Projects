@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>骆驼祥子 · 洋车梦 | 互动叙事游戏</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: #2c1a12;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', '华文楷书', 'Microsoft YaHei', 'SimHei', 'Georgia', serif;
+            padding: 20px;
+            margin: 0;
+        }
+
+        /* 游戏主容器 */
+        .game-container {
+            max-width: 700px;
+            width: 100%;
+            background: #fef3e2;
+            background-image: radial-gradient(circle at 10% 20%, rgba(210, 170, 120, 0.1) 2%, transparent 2.5%);
+            background-size: 28px 28px;
+            border-radius: 48px 32px 56px 32px;
+            box-shadow: 0 25px 40px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 200, 0.8);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        /* 老北京风格檐口 */
+        .game-header {
+            background: #5d3a1a;
+            padding: 18px 24px 12px 24px;
+            text-align: center;
+            border-bottom: 5px solid #e6bc7e;
+            box-shadow: inset 0 -2px 0 #3e2a10, 0 2px 8px rgba(0,0,0,0.2);
+        }
+
+        .game-header h1 {
+            margin: 0;
+            font-size: 2.1rem;
+            letter-spacing: 6px;
+            color: #ffefb9;
+            text-shadow: 3px 3px 0 #4a2a0c;
+            font-weight: 600;
+            word-break: keep-all;
+        }
+
+        .game-header p {
+            margin: 6px 0 0;
+            color: #f3dba6;
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        /* 状态面板 — 旧报纸风格 */
+        .stats-panel {
+            display: flex;
+            justify-content: space-between;
+            background: #2b2118;
+            padding: 12px 20px;
+            color: #f7e5c2;
+            border-bottom: 1px solid #b87c4a;
+            background-image: linear-gradient(145deg, #352812, #1f160e);
+            font-weight: bold;
+        }
+
+        .stat {
+            background: #00000066;
+            padding: 5px 14px;
+            border-radius: 40px;
+            backdrop-filter: blur(2px);
+            display: flex;
+            gap: 8px;
+            font-size: 1.1rem;
+            box-shadow: inset 0 1px 2px #ffefb033, 0 2px 3px black;
+        }
+
+        .stat span:first-child {
+            color: #ffcd94;
+        }
+
+        .stat span:last-child {
+            color: #ffecb3;
+            font-weight: bold;
+            font-size: 1.25rem;
+            min-width: 70px;
+        }
+
+        /* 叙事主舞台 */
+        .story-area {
+            padding: 28px 24px 20px;
+            min-height: 320px;
+            background: #fff6ea;
+            transition: background 0.2s;
+        }
+
+        .story-text {
+            font-size: 1.2rem;
+            line-height: 1.55;
+            color: #2e241d;
+            background: #fffaf0;
+            padding: 18px 20px;
+            border-radius: 48px 20px 48px 20px;
+            box-shadow: inset 0 0 0 1px #f7e2bf, 0 6px 14px rgba(0, 0, 0, 0.08);
+            font-weight: 500;
+            text-shadow: 0 1px 0 white;
+            margin-bottom: 20px;
+            font-family: 'Georgia', 'Times New Roman', serif;
+        }
+
+        /* 选项按钮区域 */
+        .options-area {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 8px;
+        }
+
+        .option-btn {
+            background: #efe0cb;
+            border: none;
+            padding: 12px 18px;
+            border-radius: 60px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: left;
+            color: #3c2a1f;
+            font-family: inherit;
+            cursor: pointer;
+            transition: 0.1s linear;
+            box-shadow: 0 3px 0 #aa8b60;
+            border: 1px solid #e7cfb0;
+            letter-spacing: 1px;
+        }
+
+        .option-btn:hover {
+            background: #ffefcf;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 0 #aa8b60;
+        }
+
+        .option-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #aa8b60;
+        }
+
+        /* 重置按钮 & 底部 */
+        .game-footer {
+            padding: 20px 24px 28px;
+            background: #dac29c;
+            text-align: center;
+            border-top: 2px solid #e9cf9e;
+        }
+
+        .reset-btn {
+            background: #5d3a1a;
+            border: none;
+            padding: 10px 28px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #ffefcf;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.1s;
+            box-shadow: 0 3px 0 #2f1d09;
+            font-family: inherit;
+            width: 60%;
+        }
+
+        .reset-btn:hover {
+            background: #7b4f28;
+            transform: scale(0.98);
+        }
+
+        /* 结局特殊装饰 */
+        .ending-tag {
+            text-align: center;
+            margin-top: 12px;
+            font-size: 0.9rem;
+            color: #b65c2e;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        @media (max-width: 550px) {
+            .stats-panel {
+                flex-direction: column;
+                gap: 8px;
+                align-items: center;
+            }
+            .story-text {
+                font-size: 1rem;
+            }
+            .option-btn {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container" id="gameRoot">
+    <div class="game-header">
+        <h1>骆 驼 祥 子</h1>
+        <p>· 洋车夫的梦与尘烟 ·</p>
+    </div>
+    <div class="stats-panel">
+        <div class="stat"><span>💰 大洋</span><span id="moneyVal">0</span></div>
+        <div class="stat"><span>🐎 洋车</span><span id="rickshawVal">无</span></div>
+        <div class="stat"><span>📜 际遇</span><span id="flagHint">北平·伊始</span></div>
+    </div>
+    <div class="story-area">
+        <div class="story-text" id="storyTxt">
+            民国北平，烈日与黄沙。祥子从乡间走来，壮实沉默，心里只有一个念头：买上一辆属于自己的洋车。
+        </div>
+        <div class="options-area" id="optionsContainer">
+            <!-- 动态生成按钮 -->
+        </div>
+        <div id="endingMsg" class="ending-tag"></div>
+    </div>
+    <div class="game-footer">
+        <button class="reset-btn" id="resetGameBtn">🔁 重 来 一 回</button>
+    </div>
+</div>
+
+<script>
+    // ------------------- 游戏状态机 (事件序列 + 分支数值) -------------------
+    // 核心思想：线性剧情推进 + 重要选择改变金钱/车辆/隐藏标志，最终依据多重条件生成不同结局
+    // 完全基于《骆驼祥子》主线：买车梦 → 被兵抢 → 卖骆驼得名 → 虎妞纠缠 → 不同命运岔路
+
+    // 全局变量
+    let gameData = {
+        money: 0,           // 大洋
+        hasRickshaw: false, // 是否拥有自己的车
+        // 特殊标记影响结局描述
+        marriedTiger: false,    // 是否与虎妞结婚
+        helpedFuzi: false,      // 是否帮助小福子
+        survivedSpirit: false,  // 祥子是否保持斗志 (最终判定用)
+        // 流程控制
+        step: 0,            // 当前事件索引 0~7
+        isEnding: false,
+        // 记录分支路径 (用于部分文本差异化)
+        choseAdventure: false,
+        resistedDetective: false,
+    };
+
+    // 定义剧情事件列表 (每个事件包含描述文本，选项列表，以及处理函数)
+    // step0: 初入北平，攒钱买车（自动触发买车成功+被抢事件）
+    // step1: 卖骆驼得名，虎妞登场（关键分支）
+    // step2: 分支A - 娶虎妞之路
+    // step3: 分支B - 拒绝虎妞，奋斗之路（内含多个小抉择）
+    // step4: 公共汇合前奏？实际分支各自独立走向结局判定前最后事件
+    // 为了方便，我们使用动态剧情函数，根据step和分支调用不同逻辑
+    
+    // UI 元素
+    const storyEl = document.getElementById('storyTxt');
+    const optionsDiv = document.getElementById('optionsContainer');
+    const moneySpan = document.getElementById('moneyVal');
+    const rickshawSpan = document.getElementById('rickshawVal');
+    const flagHintSpan = document.getElementById('flagHint');
+    const resetBtn = document.getElementById('resetGameBtn');
+    const endingMsgDiv = document.getElementById('endingMsg');
+
+    // 辅助刷新界面
+    function updateUI() {
+        moneySpan.innerText = gameData.money;
+        rickshawSpan.innerText = gameData.hasRickshaw ? '✓ 一辆新车' : '✗ 赁车拉活';
+        if (gameData.isEnding) {
+            flagHintSpan.innerText = '· 终章 ·';
+        } else {
+            if (gameData.marriedTiger) flagHintSpan.innerText = '🏮 虎妞之笼';
+            else if (gameData.step >= 3 && !gameData.marriedTiger) flagHintSpan.innerText = '⛅ 风雨独行';
+            else flagHintSpan.innerText = '🐫 骆驼祥子';
+        }
+    }
+
+    // 重置游戏
+    function resetGame() {
+        gameData = {
+            money: 0,
+            hasRickshaw: false,
+            marriedTiger: false,
+            helpedFuzi: false,
+            survivedSpirit: false,
+            step: 0,
+            isEnding: false,
+            choseAdventure: false,
+            resistedDetective: false,
+        };
+        endingMsgDiv.innerHTML = '';
+        // 初始剧情: 祥子三年攒钱买车，但被乱兵抢走
+        initStep0();
+    }
+
+    // 事件0: 铺垫 + 买车失车（线性叙事）
+    function initStep0() {
+        gameData.step = 0;
+        gameData.isEnding = false;
+        // 初始状态: 三年血汗钱100元买车，然后被抢，卖骆驼得35元
+        // 故事叙述
+        let initialDesc = `祥子怀揣梦想，拉散座、包月，省吃俭用整整三年！终于用血汗钱换了一辆崭新的洋车。<br>可恨乱兵过境，连车带人被掳去，趁着黑夜他牵回三匹骆驼，贱卖了三十五块大洋。从此得了个诨名——“骆驼祥子”。`;
+        storyEl.innerHTML = initialDesc;
+        // 数值变更: 买车花费100（但被抢归零），卖骆驼得35
+        gameData.money = 35;
+        gameData.hasRickshaw = false;
+        updateUI();
+        // 下一个事件提示选项
+        showOptionsForStep1();
+    }
+
+    // 进入关键剧情: 人和车厂，虎妞登场
+    function showOptionsForStep1() {
+        storyEl.innerHTML = `回到人和车厂，刘四爷依然刻薄，可虎妞那双眼却盯上了祥子。她时不时送酒送菜，话语里满是暧昧。<br><br>一日，虎妞借着酒劲把祥子拽进屋里……你知道这女人惹不起，但内心挣扎：是就此认命，还是坚守买车的执念？`;
+        optionsDiv.innerHTML = `
+            <button class="option-btn" id="choiceMarry">🌺 接受虎妞 · 走捷径买车</button>
+            <button class="option-btn" id="choiceRefuse">💪 拒绝引诱 · 继续拉车攒钱</button>
+        `;
+        document.getElementById('choiceMarry').addEventListener('click', () => marryRoute());
+        document.getElementById('choiceRefuse').addEventListener('click', () => refuseRoute());
+    }
+
+    // ======================= 分支A：与虎妞纠缠 =======================
+    function marryRoute() {
+        gameData.marriedTiger = true;
+        gameData.step = 2; // 虎妞路线
+        
+        // 虎妞逼婚，刘四爷大怒，但虎妞有私房钱给祥子买车
+        gameData.hasRickshaw = true;
+        // 虎妞花钱买车，祥子金钱不变（虎妞出钱）
+        // 描述
+        storyEl.innerHTML = `虎妞挺着肚子，逼祥子认了这门亲。刘四爷气得变卖车厂远走，虎妞拿出私房钱给祥子买了一辆二手车。<br>祥子又有了自己的车！可虎妞好吃懒做，花钱如流水，祥子拉车养家疲惫不堪。不久虎妞难产，大人孩子都没保住……`;
+        // 虎妞去世，丧事花费，祥子被迫卖掉车
+        gameData.hasRickshaw = false;
+        gameData.money = Math.max(0, gameData.money - 22); // 丧葬借钱，大洋减少
+        if(gameData.money < 0) gameData.money = 0;
+        updateUI();
+        
+        // 虎妞死后，小福子出现
+        storyEl.innerHTML += `<br><br>虎妞一死，祥子重新拉赁车，遇见了曾经心善的小福子。她受尽欺凌，却仍对祥子有情。可祥子一无所有，小福子也自身难保……`;
+        // 选项: 是否尽力帮助小福子
+        optionsDiv.innerHTML = `
+            <button class="option-btn" id="helpFuzi">❤️ 尽力帮小福子赎身 (花15大洋)</button>
+            <button class="option-btn" id="ignoreFuzi">🍂 自顾不暇，黯然离开</button>
+        `;
+        document.getElementById('helpFuzi').addEventListener('click', () => {
+            if(gameData.money >= 15) {
+                gameData.money -= 15;
+                gameData.helpedFuzi = true;
+                updateUI();
+                storyEl.innerHTML = `你拿出积蓄帮小福子摆脱了腌臜地，她感激涕零，你们在城南租了间破屋。可世道吃人，小福子终究因不堪受辱上吊了……祥子最后的念想断了。`;
+            } else {
+                storyEl.innerHTML = `祥子囊中羞涩，连帮小福子的银钱都凑不齐。小福子含泪离去，几日后听闻她投了湖。祥子彻底麻木。`;
+                gameData.helpedFuzi = false;
+            }
+            // 导向结局判定
+            finalEndingForMarry();
+        });
+        document.getElementById('ignoreFuzi').addEventListener('click', () => {
+            gameData.helpedFuzi = false;
+            storyEl.innerHTML = `祥子心灰意冷，躲着小福子。后来听说小福子进了白房子，自尽了。祥子连眼泪都没了，像行尸走肉。`;
+            finalEndingForMarry();
+        });
+    }
+    
+    // 虎妞路线的最终结局判定 (依据最后的精神和金钱)
+    function finalEndingForMarry() {
+        gameData.isEnding = true;
+        let endingText = "";
+        // 即便虎妞死后，祥子可能还有少量余钱，但基本上身心俱疲
+        if(gameData.helpedFuzi && gameData.money >= 8) {
+            endingText = `【结局 · 残灯】小福子死后，祥子偶尔拉车，但眼神已死。尽管手里还有几个铜板，却再也燃不起买车的火。他变成北平城里又一个烟鬼酒徒，苟延残喘。骆驼祥子死了，只剩空壳。`;
+        } else if (gameData.money >= 20 && !gameData.helpedFuzi) {
+            endingText = `【结局 · 孤影】祥子没有帮助小福子，手里反倒攒了些钱，可虎妞的阴影、小福子的死让他彻底冷了心。他买了壶烧酒，醉倒在天桥底下，醒来后成了一名最下等的散工，再无买车之志。旧梦碾作尘。`;
+        } else {
+            endingText = `【结局 · 堕落】祥子完全垮了。抽烟、耍滑、出卖朋友，最后在红白喜事里混口饭。人们只记得从前有个壮实的车夫叫“骆驼祥子”，如今只见一个佝偻的乞丐。那辆梦中洋车，早已零落成泥。`;
+        }
+        storyEl.innerHTML = `<strong>📖 北平·尾声</strong><br>${endingText}<br><br>老舍笔下的悲剧仍未散尽，祥子的挣扎终被旧社会碾碎。你的选择映照了他的沉浮。`;
+        optionsDiv.innerHTML = `<button class="option-btn" id="restartFromEnd">🌄 重新入梦 · 再活一回</button>`;
+        document.getElementById('restartFromEnd').addEventListener('click', resetGame);
+        endingMsgDiv.innerHTML = "⚰️ 洋车梦碎，一声叹息";
+        updateUI();
+    }
+
+    // ======================= 分支B：拒绝虎妞，自力更生之路（多抉择）=======================
+    function refuseRoute() {
+        gameData.marriedTiger = false;
+        gameData.step = 3;
+        // 拒绝虎妞后，祥子离开人和车厂，到曹先生家拉包月，日子安稳但暗藏祸端
+        storyEl.innerHTML = `祥子躲着虎妞，托人介绍到曹先生家拉包月。曹家待人和气，祥子渐渐又攒下一些钱。可一天，孙侦探找上门，说曹先生是乱党，趁机敲诈！<br><br>孙侦探恶狠狠盯着祥子：“想活命就拿钱来！”`;
+        // 此时金钱展示 (原有35 + 后续拉车增加积蓄，为了游戏性，增加通过劳苦积攒)
+        // 给玩家一些奋斗机会: 之前卖骆驼35元，加上拉包月可以多赚
+        gameData.money = 35 + 18; // 额外18元包月辛苦钱 = 53
+        updateUI();
+        
+        // 侦探敲诈分支
+        optionsDiv.innerHTML = `
+            <button class="option-btn" id="resistHalf">💢 反抗孙侦探！哪怕被打 (损失一半积蓄)</button>
+            <button class="option-btn" id="giveAll">😞 忍气吞声，交出全部积蓄</button>
+        `;
+        document.getElementById('resistHalf').addEventListener('click', () => {
+            gameData.resistedDetective = true;
+            let lost = Math.floor(gameData.money / 2);
+            gameData.money -= lost;
+            if(gameData.money < 0) gameData.money = 0;
+            updateUI();
+            storyEl.innerHTML = `祥子红了眼，与孙侦探厮打，被打得头破血流，钱袋被扯破，散落一半大洋。孙侦探骂骂咧咧逃走。祥子捂着伤口，身上只剩 ${gameData.money} 块大洋。`;
+            afterDetectiveChoice();
+        });
+        document.getElementById('giveAll').addEventListener('click', () => {
+            gameData.resistedDetective = false;
+            gameData.money = 0;
+            updateUI();
+            storyEl.innerHTML = `祥子战战兢兢把所有积蓄双手奉上。孙侦探冷笑一声扬长而去。祥子蹲在墙角，一文不名，泪水无声滑落。`;
+            afterDetectiveChoice();
+        });
+    }
+    
+    // 侦探事件后的继续：人生抉择，增加额外机遇
+    function afterDetectiveChoice() {
+        // 追加情节：是否还有力气重新攒钱
+        storyEl.innerHTML += `<br><br>一无所有的祥子又回到车厂，拉一天算一天。某天偶然听说西山煤矿拉货赚钱多，但极苦；也有人劝他老老实实再赁车。`;
+        optionsDiv.innerHTML = `
+            <button class="option-btn" id="goMine">⛏️ 去西山冒险拉煤 (收入+40，但损耗身体)</button>
+            <button class="option-btn" id="steadyRent">🚶 留在北平赁车拉散座 (安稳+20大洋)</button>
+        `;
+        document.getElementById('goMine').addEventListener('click', () => {
+            gameData.choseAdventure = true;
+            gameData.money += 40;
+            updateUI();
+            storyEl.innerHTML = `祥子咬牙去了西山，拉煤数月，赚了40块大洋，可肺也伤了，腿也落下了病。回到北平，他攥着钱又想买车，但身体大不如前。`;
+            afterLaborFinal();
+        });
+        document.getElementById('steadyRent').addEventListener('click', () => {
+            gameData.choseAdventure = false;
+            gameData.money += 20;
+            updateUI();
+            storyEl.innerHTML = `祥子依旧拉散座，省吃俭用攒下20大洋。虽然缓慢，但总算有了点盼头，可乱世里，谁也不知道明天会怎样。`;
+            afterLaborFinal();
+        });
+    }
+    
+    // 最后买车/小福子情节 最终结局判定 (拒绝虎妞线的终点)
+    function afterLaborFinal() {
+        // 添加小福子的剧情收尾
+        let currentMoney = gameData.money;
+        storyEl.innerHTML += `<br><br>祥子听说小福子还在苦海，她来找祥子，想跟他过日子。可要帮她还清债，至少需要20大洋。祥子犹豫了……`;
+        optionsDiv.innerHTML = `
+            <button class="option-btn" id="finalHelp">🌹 拿出20大洋帮小福子赎身 (共度余生)</button>
+            <button class="option-btn" id="finalNoHelp">🥀 狠心拒绝，只为买车梦</button>
+        `;
+        document.getElementById('finalHelp').addEventListener('click', () => {
+            if(gameData.money >= 20) {
+                gameData.money -= 20;
+                gameData.helpedFuzi = true;
+                updateUI();
+                storyEl.innerHTML = `祥子赎回了小福子，两人相依为命。可没过多久祥子积劳成疾，小福子日夜照料，洋车梦终究没圆。<br>但他们在污泥里竟保留了一丝人的温暖。`;
+                // 根据是否还有余钱买车
+                if(gameData.money >= 100 && !gameData.hasRickshaw) {
+                    storyEl.innerHTML += `祥子拖着病体硬是凑足了钱，买下旧车！小福子坐在车上，祥子拉着她走过长安街，像一场缥缈的梦。`;
+                    gameData.hasRickshaw = true;
+                    updateUI();
+                    endingRefuseGood();
+                } else {
+                    endingRefuseMiddle();
+                }
+            } else {
+                storyEl.innerHTML = `祥子实在凑不出20大洋，小福子含泪离去，不久后悬梁自尽。祥子万念俱灰，彻底成为北平的游魂。`;
+                endingRefuseBad();
+            }
+        });
+        document.getElementById('finalNoHelp').addEventListener('click', () => {
+            gameData.helpedFuzi = false;
+            storyEl.innerHTML = `祥子攥着钱，咬咬牙决定买车！四处搜寻，终于用${gameData.money}大洋买了一辆半新洋车！<br>可刚拉了两天，一群散兵又把车抢走，还打断了他的腿。祥子躺在破庙里，只剩半条命。`;
+            if(gameData.money >= 80) {
+                gameData.hasRickshaw = true;
+                gameData.money = Math.max(0, gameData.money - 85);
+                updateUI();
+                storyEl.innerHTML += `<br>车又没了，人残了。祥子明白，穷人的命是骆驼，永远驮着大山。`;
+            } else {
+                gameData.hasRickshaw = false;
+                gameData.money = Math.max(0, gameData.money - 30);
+                updateUI();
+                storyEl.innerHTML += `<br>连旧车都买不起，反而被混混骗走最后的积蓄。`;
+            }
+            endingRefuseBad();
+        });
+    }
+    
+    // 拒绝虎妞路线的多种结局
+    function endingRefuseGood() {
+        gameData.isEnding = true;
+        let endStr = `【结局 · 微光】历经千辛万苦，祥子终于拥有自己的车，小福子也在身边。尽管世道艰难，祥子眼中重新燃起一丝倔强。这或许是老北京最卑微也最珍贵的胜利。可历史洪流下，这点星光能亮多久？无人知晓……「相对圆满·骆驼依然前行」`;
+        storyEl.innerHTML = `<strong>🏮 结局 · 北平旧梦</strong><br>${endStr}`;
+        optionsDiv.innerHTML = `<button class="option-btn" id="restartGoodEnd">🕯️ 再入骆驼客的人生</button>`;
+        document.getElementById('restartGoodEnd').addEventListener('click', resetGame);
+        endingMsgDiv.innerHTML = "🐫 洋车哐当，血仍未冷";
+        updateUI();
+    }
+    function endingRefuseMiddle() {
+        gameData.isEnding = true;
+        let endStr = `【结局 · 微尘】祥子与小福子粗茶淡饭，但再也拉不动车，那辆梦中的洋车化成黄土。刘四爷偶尔路过，啐一口：“穷骨头”。祥子佝偻着背，只是傻笑。骆驼祥子死了，活着的叫“麻木”。`;
+        storyEl.innerHTML = `<strong>🥀 结局 · 市井浮沉</strong><br>${endStr}`;
+        optionsDiv.innerHTML = `<button class="option-btn" id="restartMidEnd">🌪️ 重历风雨</button>`;
+        document.getElementById('restartMidEnd').addEventListener('click', resetGame);
+        endingMsgDiv.innerHTML = "🍂 洋车梦断，空余叹息";
+        updateUI();
+    }
+    function endingRefuseBad() {
+        gameData.isEnding = true;
+        let endStr = `【结局 · 行尸走肉】祥子彻底堕落，吃、喝、嫖、赌，出卖朋友。他不再是那个体面要强的车夫，而是城隍庙门口最烂的酒鬼。老舍先生叹息：个人主义终末路，旧社会吃人不吐骨。`;
+        storyEl.innerHTML = `<strong>💀 结局 · 沉沦</strong><br>${endStr}`;
+        optionsDiv.innerHTML = `<button class="option-btn" id="restartBadEnd">🔄 再续骆驼魂</button>`;
+        document.getElementById('restartBadEnd').addEventListener('click', resetGame);
+        endingMsgDiv.innerHTML = "⚰️ 魂断北平，再无祥子";
+        updateUI();
+    }
+
+    // 重置监听
+    resetBtn.addEventListener('click', resetGame);
+    
+    // 初始化开始
+    resetGame();
+</script>
+</body>
+</html>

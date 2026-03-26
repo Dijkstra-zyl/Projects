@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>安史之乱 · 天宝劫 | 命运抉择</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            background: #2a2418;
+            background-image: linear-gradient(145deg, #2f281c 0%, #1e1910 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: 'Segoe UI', '华文楷书', 'Microsoft YaHei', 'Georgia', 'Times New Roman', serif;
+            padding: 20px;
+            margin: 0;
+        }
+
+        /* 古风卷轴主容器 */
+        .game-container {
+            max-width: 750px;
+            width: 100%;
+            background: #fef2df;
+            background-image: radial-gradient(circle at 20% 30%, rgba(180, 130, 70, 0.08) 1.5%, transparent 1.8%);
+            background-size: 32px 32px;
+            border-radius: 32px 8px 48px 8px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), inset 0 1px 3px rgba(255, 245, 210, 0.9);
+            overflow: hidden;
+            transition: all 0.2s;
+            border: 1px solid #c9aa6f;
+        }
+
+        /* 唐风檐角 */
+        .game-header {
+            background: #8b3c1c;
+            background: linear-gradient(95deg, #712e12, #9b4a24);
+            padding: 18px 24px 14px;
+            text-align: center;
+            border-bottom: 4px solid #e4bc7c;
+            box-shadow: inset 0 -1px 0 #4f2a0e, 0 3px 8px rgba(0,0,0,0.3);
+        }
+
+        .game-header h1 {
+            margin: 0;
+            font-size: 2rem;
+            letter-spacing: 8px;
+            color: #ffefc0;
+            text-shadow: 3px 3px 0 #4a2810;
+            font-weight: 600;
+        }
+
+        .game-header p {
+            margin: 6px 0 0;
+            color: #ffdfa5;
+            font-style: italic;
+            font-size: 0.85rem;
+        }
+
+        /* 状态栏 - 大唐气象 */
+        .stats-panel {
+            display: flex;
+            justify-content: space-between;
+            background: #352917;
+            padding: 10px 24px;
+            color: #f7e9cf;
+            border-bottom: 1px solid #c29454;
+            background-image: linear-gradient(145deg, #44301c, #281f12);
+            font-weight: bold;
+        }
+
+        .stat {
+            background: #1f170e80;
+            padding: 4px 16px;
+            border-radius: 40px;
+            backdrop-filter: blur(2px);
+            display: flex;
+            gap: 10px;
+            font-size: 1rem;
+            letter-spacing: 1px;
+        }
+
+        .stat span:first-child {
+            color: #ffcf8a;
+        }
+
+        .stat span:last-child {
+            color: #fff2d2;
+            font-weight: bold;
+            min-width: 90px;
+        }
+
+        /* 叙事区域 */
+        .story-area {
+            padding: 28px 26px 20px;
+            min-height: 350px;
+            background: #fff8ed;
+        }
+
+        .story-text {
+            font-size: 1.15rem;
+            line-height: 1.6;
+            color: #2b241a;
+            background: #fffbf0;
+            padding: 20px 24px;
+            border-radius: 28px 12px 32px 12px;
+            box-shadow: inset 0 0 0 1px #fbefd2, 0 8px 18px rgba(0, 0, 0, 0.08);
+            font-family: 'Georgia', 'Times New Roman', serif;
+            margin-bottom: 24px;
+        }
+
+        /* 选项按钮 古铜风格 */
+        .options-area {
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            margin-top: 6px;
+        }
+
+        .option-btn {
+            background: #e7d7bc;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 48px;
+            font-size: 1rem;
+            font-weight: bold;
+            text-align: left;
+            color: #3a2b1a;
+            font-family: inherit;
+            cursor: pointer;
+            transition: 0.12s linear;
+            box-shadow: 0 3px 0 #997f56;
+            border: 1px solid #f2e2c0;
+            letter-spacing: 1px;
+        }
+
+        .option-btn:hover {
+            background: #ffeac8;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 0 #997f56;
+        }
+
+        .option-btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #997f56;
+        }
+
+        .reset-btn {
+            background: #7a3a1c;
+            border: none;
+            padding: 10px 30px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: #ffefcf;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.1s;
+            box-shadow: 0 3px 0 #45200c;
+            font-family: inherit;
+            width: 60%;
+        }
+
+        .reset-btn:hover {
+            background: #9b542e;
+            transform: scale(0.98);
+        }
+
+        .game-footer {
+            padding: 18px 24px 28px;
+            background: #ddc7a2;
+            text-align: center;
+            border-top: 2px solid #efdaae;
+        }
+
+        .ending-tag {
+            text-align: center;
+            margin-top: 16px;
+            font-size: 0.9rem;
+            color: #b4552a;
+            font-weight: bold;
+            letter-spacing: 2px;
+        }
+
+        @media (max-width: 550px) {
+            .stats-panel {
+                flex-direction: column;
+                gap: 6px;
+                align-items: center;
+            }
+            .story-text {
+                font-size: 0.98rem;
+                padding: 16px;
+            }
+            .option-btn {
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container" id="gameRoot">
+    <div class="game-header">
+        <h1>安 史 之 乱</h1>
+        <p>· 天宝十四载 · 盛世倾覆 谁主沉浮 ·</p>
+    </div>
+    <div class="stats-panel">
+        <div class="stat"><span>📅 年号</span><span id="yearVal">天宝十四载</span></div>
+        <div class="stat"><span>🎋 身份</span><span id="roleVal">长安士人</span></div>
+        <div class="stat"><span>⚖️ 节气</span><span id="spiritVal">热血未冷</span></div>
+    </div>
+    <div class="story-area">
+        <div class="story-text" id="storyTxt">
+            天宝十四载（755年），大唐繁华似锦，暗流涌动。你乃长安城中一位饱读诗书的文人，胸怀济世之志。<br>
+            十一月初九，范阳节度使安禄山率十五万铁骑南下，号称“讨伐杨国忠”，烽火骤燃。盛世一夜蒙尘。
+        </div>
+        <div class="options-area" id="optionsContainer">
+            <!-- 动态生成按钮 -->
+        </div>
+        <div id="endingMsg" class="ending-tag"></div>
+    </div>
+    <div class="game-footer">
+        <button class="reset-btn" id="resetGameBtn">🪶 重 书 命 运</button>
+    </div>
+</div>
+
+<script>
+    // ------------------- 安史之乱 · 抉择史诗 -------------------
+    // 状态变量：无复杂数值，主要记录关键抉择，导向不同结局
+    let gameState = {
+        step: 0,            // 剧情节点
+        isEnding: false,
+        // 重大抉择标志
+        joinCourt: false,       // 是否投身朝廷勤王
+        fleeSichuan: false,     // 是否随驾入蜀
+        defendCity: false,      // 是否参与睢阳/太原坚守
+        savedPeople: false,     // 是否在乱世中救助百姓
+        allyWithRebels: false,  // 是否曾投降叛军（失节）
+        inspiredGeneral: false, // 是否激励郭子仪部
+        // 结局细分
+        endingType: null
+    };
+
+    // UI元素
+    const storyEl = document.getElementById('storyTxt');
+    const optionsDiv = document.getElementById('optionsContainer');
+    const yearSpan = document.getElementById('yearVal');
+    const roleSpan = document.getElementById('roleVal');
+    const spiritSpan = document.getElementById('spiritVal');
+    const resetBtn = document.getElementById('resetGameBtn');
+    const endingMsgDiv = document.getElementById('endingMsg');
+
+    // 辅助刷新状态栏文本
+    function updateStatusUI() {
+        if (gameState.isEnding) {
+            yearSpan.innerText = '乱世·终章';
+            roleSpan.innerText = gameState.allyWithRebels ? '失节之人' : (gameState.joinCourt ? '勤王义士' : '流离孤鸿');
+            spiritSpan.innerText = gameState.savedPeople ? '心存仁义' : (gameState.allyWithRebels ? '脊梁已断' : '黯然神伤');
+            return;
+        }
+        // 根据进度改变状态栏
+        if (gameState.step >= 1 && gameState.step <= 2) {
+            yearSpan.innerText = '至德元载';
+            roleSpan.innerText = gameState.joinCourt ? '朝廷幕僚' : '避祸书生';
+            spiritSpan.innerText = gameState.joinCourt ? '忧国忧民' : '明哲保身';
+        } else if (gameState.step >= 3) {
+            yearSpan.innerText = '至德二载·乾元';
+            if (gameState.defendCity) roleSpan.innerText = '守城义士';
+            else if (gameState.fleeSichuan) roleSpan.innerText = '随驾文官';
+            else roleSpan.innerText = '乱世游魂';
+            spiritSpan.innerText = gameState.savedPeople ? '侠骨柔肠' : (gameState.allyWithRebels ? '蒙尘之耻' : '苟全性命');
+        } else {
+            yearSpan.innerText = '天宝十四载';
+            roleSpan.innerText = '长安士人';
+            spiritSpan.innerText = '热血未冷';
+        }
+    }
+
+    // 重置游戏
+    function resetGame() {
+        gameState = {
+            step: 0,
+            isEnding: false,
+            joinCourt: false,
+            fleeSichuan: false,
+            defendCity: false,
+            savedPeople: false,
+            allyWithRebels: false,
+            inspiredGeneral: false,
+            endingType: null
+        };
+        endingMsgDiv.innerHTML = '';
+        initStep0();
+    }
+
+    // 剧情0：安史之乱爆发，长安惊变
+    function initStep0() {
+        gameState.step = 0;
+        gameState.isEnding = false;
+        storyEl.innerHTML = `天宝十四载（755年）十一月初九，身兼三镇节度使的安禄山于范阳起兵，诈称奉密诏讨伐杨国忠。叛军铁蹄势如破竹，河北州县望风而降。<br><br>
+        腊月，洛阳陷落。消息传入长安，满朝震骇。你站在朱雀街头，看到无数百姓携家南逃，而玄宗皇帝仍犹豫不决。高门大户皆言：“安贼兵强马壮，不可力敌。”<br><br>
+        你身为一介文人，心怀家国，是投笔从戎奔赴前线，还是随众南逃避祸？`;
+        optionsDiv.innerHTML = `
+            <button class="option-btn" id="choiceJoinArmy">⚔️ 投效朝廷 · 奔赴潼关大营</button>
+            <button class="option-btn" id="choiceFleeSouth">🍂 携书南遁 · 暂避江南</button>
+        `;
+        document.getElementById('choiceJoinArmy').addEventListener('click', () => joinArmyPath());
+        document.getElementById('choiceFleeSouth').addEventListener('click', () => fleeSouthPath());
+        updateStatusUI();
+    }
+
+    // 分支一：投效朝廷（积极路线）
+    function joinArmyPath() {
+        gameState.joinCourt = true;
+        gameState.step = 1;
+        storyEl.innerHTML = `你毅然西行，投奔潼关守将哥舒翰幕中，献上《平贼十策》。哥舒翰虽年老多病，却赞你气节。但宰相杨国忠猜忌武将，强逼哥舒翰出关决战。<br><br>
+        灵宝之战，唐军大败，潼关失守。你九死一生逃出，得知玄宗已仓皇西逃。叛军长驱直入，长安沦陷。<br><br>
+        此时你听闻太子李亨在灵武即位，是为肃宗，号召天下勤王。你决意前往灵武，路上遇见溃兵劫掠百姓，又见难民哀嚎……`;
+        optionsDiv.innerHTML = `
+            <button class="option-btn" id="saveRefugees">❤️ 仗义收拢难民，护送老弱</button>
+            <button class="option-btn" id="rushLingwu">🏃 急赴灵武献策，争分夺秒</button>
+        `;
+        document.getElementById('saveRefugees').addEventListener('click', () => {
+            gameState.savedPeople = true;
+            storyEl.innerHTML = `你沿途召集流民，以文弱之躯组织避难队伍，虽因此迟了半月才到灵武，却救下三百余条性命。肃宗听闻，感慨道：“乱世犹存仁义，士人风骨。”授你从八品参军。`;
+            afterLingwuArrival();
+        });
+        document.getElementById('rushLingwu').addEventListener('click', () => {
+            gameState.savedPeople = false;
+            storyEl.innerHTML = `你日夜兼程赶到灵武，献上御敌方略。肃宗大为赏识，破格擢为起居舍人。但路上你未曾救助难民，心中隐隐不安。`;
+            afterLingwuArrival();
+        });
+    }
+
+    function afterLingwuArrival() {
+        gameState.step = 2;
+        storyEl.innerHTML += `<br><br>至德元载（756年），朝廷以郭子仪、李光弼为帅，开始反击。叛军内部亦生内讧，安禄山被其子安庆绪所杀。<br>
+        但战事胶着，睢阳张巡、许远死守孤城，阻挡叛军南下。你被派往江淮筹措粮饷，途经睢阳附近，见饿殍遍野，是留粮救灾，还是保证军资？`;
+        optionsDiv.innerHTML = `
+            <button class="option-btn" id="supportSuizhou">🏯 分粮救济睢阳饥民，哪怕延缓军粮</button>
+            <button class="option-btn" id="strictArmy">📦 以军务为先，全数押运粮草</button>
+        `;
+        document.getElementById('supportSuizhou').addEventListener('click', () => {
+            gameState.savedPeople = true;   // 深化救人印记
+            gameState.defendCity = true;    // 间接参与守城精神
+            storyEl.innerHTML = `你冒着被问责的风险，分出一半粮米送入睢阳。城中军民暂得喘息，张巡亲笔写信致谢。但军粮短缺，导致前线攻势稍缓，郭子仪虽未怪罪，朝中却有人弹劾你“擅改军需”。<br>
+            不久睢阳终因弹尽粮绝陷落，但张巡、许远的气节感天动地。你因救济百姓被贬为庶人，心中却无悔。`;
+            enterFinalChoices(true);
+        });
+        document.getElementById('strictArmy').addEventListener('click', () => {
+            gameState.savedPeople = false;
+            storyEl.innerHTML = `你将粮草如期运抵，官军士气高涨，陆续收复长安、洛阳。但听闻睢阳城破时百姓易子而食，你夜不能寐，时常梦到难民绝望的眼睛。<br>
+            肃宗还都长安，论功行赏，你升任六品京官。可富贵荣华掩不住心头愧疚……`;
+            enterFinalChoices(false);
+        });
+    }
+
+    // 最终抉择: 继续效忠朝廷或者隐退/甚至误入歧途
+    function enterFinalChoices(didHelpPeople) {
+        gameState.step = 3;
+        let extraText = didHelpPeople ? `你虽被贬，但名望在民间渐长。叛军残余未平，史思明再叛。` : `你身居朝堂，见宦官专权，功臣遭忌，李光弼、郭子仪皆受猜忌。`;
+        storyEl.innerHTML += `<br><br>${extraText} 乾元二年（759年），史思明杀安庆绪，再度攻陷洛阳。朝廷征兵，百姓厌战。你面临人生最后抉择：`;
+
+        if (didHelpPeople) {
+            optionsDiv.innerHTML = `
+                <button class="option-btn" id="finalRebelAgainst">🌾 挺身组织乡勇，护民抗贼</button>
+                <button class="option-btn" id="finalRetire">📜 隐居山林，著书立说</button>
+            `;
+            document.getElementById('finalRebelAgainst').addEventListener('click', () => {
+                gameState.defendCity = true;
+                gameState.inspiredGeneral = true;
+                endingGoodRebel();
+            });
+            document.getElementById('finalRetire').addEventListener('click', () => {
+                endingScholarRetire();
+            });
+        } else {
+            optionsDiv.innerHTML = `
+                <button class="option-btn" id="finalStayCourt">🏛️ 留在朝中，希图匡扶</button>
+                <button class="option-btn" id="finalDesert">🍶 心灰意冷，饮酒避世</button>
+                <button class="option-btn" id="collaborateRisk">⚠️ 迫于时势，投靠叛军（险路）</button>
+            `;
+            document.getElementById('finalStayCourt').addEventListener('click', () => endingLoyalFrustrated());
+            document.getElementById('finalDesert').addEventListener('click', () => endingDrunkDespair());
+            document.getElementById('collaborateRisk').addEventListener('click', () => endingCollaborator());
+        }
+        updateStatusUI();
+    }
+
+    // ----- 南逃避祸分支 (消极/中立路线) -----
+    function fleeSouthPath() {
+        gameState.joinCourt = false;
+        gameState.step = 1;
+        storyEl.innerHTML = `你携带书卷仓皇南奔，过秦岭，入蜀中。一路上见溃兵烧杀，百姓流离。你寄居于成都友人处，听闻玄宗入蜀，太子在灵武即位，心中五味杂陈。<br><br>
+        至德二载，安禄山被杀，朝廷逐渐反攻。友人劝你出仕剑南节度使幕府，以文笔换衣食。但也有人邀你加入民间义军，北上参与收复两京。`;
+        optionsDiv.innerHTML = `
+            <button class="option-btn" id="joinLocalArmy">🛡️ 加入义军，北上报国</button>
+            <button class="option-btn" id="stayInShu">🍵 安于蜀中，教书度日</button>
+        `;
+        document.getElementById('joinLocalArmy').addEventListener('click', () => {
+            gameState.joinCourt = true;  // 转变立场
+            gameState.savedPeople = true;
+            storyEl.innerHTML = `你弃笔从戎，加入川中义师，随大将高适东出散关。虽未立奇功，却在转运粮草、安抚百姓时竭尽全力。乱世稍定，你还乡却发现家园已成焦土。`;
+            enterFinalChoices(true);
+        });
+        document.getElementById('stayInShu').addEventListener('click', () => {
+            gameState.joinCourt = false;
+            gameState.savedPeople = false;
+            storyEl.innerHTML = `你留在成都，设馆授徒，潜心诗文。多年后战乱渐平，你写下《悲陈陶》《哀江头》等诗篇，记录乱世疮痍，终成一方诗名。`;
+            endingPoetLegacy();
+        });
+    }
+
+    // ===================== 结局区 =====================
+
+    // 好结局：护民抗贼 正气长存
+    function endingGoodRebel() {
+        gameState.isEnding = true;
+        let desc = `【结局 · 天地正气】<br><br>
+        你散尽家财，组织乡兵，据守淮西一隅。史思明部将屡攻不下，百姓拥戴你为“义旗”。郭子仪率军反攻时，你率义军配合，大破叛军。<br>
+        战后朝廷欲授你高官，你却辞而不受，回乡兴办学堂，安葬枯骨。世人赞你“乱世铁骨，不失书生本色”。大唐虽元气大伤，但你的名字刻在《忠义传》中，烛照汗青。`;
+        storyEl.innerHTML = desc;
+        optionsDiv.innerHTML = `<button class="option-btn" id="restartFinal">🪶 再入烽烟 · 重写历史</button>`;
+        document.getElementById('restartFinal').addEventListener('click', resetGame);
+        endingMsgDiv.innerHTML = "✨ 丹心映日月，浩然天地间 ✨";
+        updateStatusUI();
+    }
+
+    // 隐居著书结局
+    function endingScholarRetire() {
+        gameState.isEnding = true;
+        let desc = `【结局 · 青灯残简】<br><br>
+        你隐于江南山林，筑草堂，聚书卷，将安史之乱亲历之事编为《见闻录》。晚年生计困顿，却留下一部真实史料。后世史家采撷你的笔记，得以还原乱世细节。<br>
+        你的名字虽不显于朝堂，却如一粒星火，照亮千年后的眼睛。`;
+        storyEl.innerHTML = desc;
+        optionsDiv.innerHTML = `<button class="option-btn" id="restartFinal2">📖 重拾笔墨 · 再临乱世</button>`;
+        document.getElementById('restartFinal2').addEventListener('click', resetGame);
+        endingMsgDiv.innerHTML = "🍂 文章憎命达，诗史流芳长";
+        updateStatusUI();
+    }
+
+    function endingLoyalFrustrated() {
+        gameState.isEnding = true;
+        let desc = `【结局 · 沉浮宦海】<br><br>
+        你留在朝中，历经肃宗、代宗两朝，眼见宦官李辅国、鱼朝恩弄权，郭子仪被罢兵权。吐蕃攻入长安时你随驾逃难，一生抱负未展，最终致仕回乡，郁郁而终。<br>
+        晚景时你常叹：“忆昔开元全盛日，小邑犹藏万家室。如今只剩残破山河。”`;
+        storyEl.innerHTML = desc;
+        optionsDiv.innerHTML = `<button class="option-btn" id="resetFinal3">🌾 再择前程</button>`;
+        document.getElementById('resetFinal3').addEventListener('click', resetGame);
+        endingMsgDiv.innerHTML = "🥀 盛世烟花落，孤臣泪满襟";
+        updateStatusUI();
+    }
+
+    function endingDrunkDespair() {
+        gameState.isEnding = true;
+        let desc = `【结局 · 醉乡沉沦】<br><br>
+        你目睹朝廷腐败，百姓依旧困苦，心灰意冷，日日沉湎酒肆。曾在长安街头与乞丐争食，旧友皆耻与为伍。安史之乱平定后，你贫病交加，死时身边唯余一卷《离骚》。<br>
+        乱世压垮了你的脊梁，再无当年投笔之勇。`;
+        storyEl.innerHTML = desc;
+        optionsDiv.innerHTML = `<button class="option-btn" id="resetFinal4">🍷 惊醒 · 再历红尘</button>`;
+        document.getElementById('resetFinal4').addEventListener('click', resetGame);
+        endingMsgDiv.innerHTML = "🍶 人生有情泪沾臆，江水江花岂终极";
+        updateStatusUI();
+    }
+
+    function endingCollaborator() {
+        gameState.isEnding = true;
+        gameState.allyWithRebels = true;
+        let desc = `【结局 · 千秋耻】<br><br>
+        你为保全家小，投靠了史思明幕下，担任伪职。后来官军平定叛乱，你被俘流放岭南。史书留下“贰臣”之名，族人蒙羞，子孙三代不得科举。<br>
+        暮年你对着残阳喃喃：“早知今日，何如当年血溅潼关。” 但历史没有如果。`;
+        storyEl.innerHTML = desc;
+        optionsDiv.innerHTML = `<button class="option-btn" id="resetFinal5">⚰️ 洗去尘埃 · 重头来过</button>`;
+        document.getElementById('resetFinal5').addEventListener('click', resetGame);
+        endingMsgDiv.innerHTML = "⚠️ 失节事大，遗臭青史";
+        updateStatusUI();
+    }
+
+    function endingPoetLegacy() {
+        gameState.isEnding = true;
+        let desc = `【结局 · 诗史留名】<br><br>
+        你避祸蜀中，以笔为剑，写下《兵车行》《丽人行》续篇，流传甚广。晚年杜甫、王维与你交游，你的诗句被刻于浣花溪畔。<br>
+        安史之乱最终平定，你却未再出仕。你的诗记录了百姓血泪，让后人窥见盛唐崩裂的一瞬。文名千古，亦是不负此生。`;
+        storyEl.innerHTML = desc;
+        optionsDiv.innerHTML = `<button class="option-btn" id="resetFinal6">🖌️ 诗魂再续 · 重写史诗</button>`;
+        document.getElementById('resetFinal6').addEventListener('click', resetGame);
+        endingMsgDiv.innerHTML = "📜 文章垂世，乱世烛光";
+        updateStatusUI();
+    }
+
+    // 重置按钮监听
+    resetBtn.addEventListener('click', resetGame);
+
+    // 启动游戏
+    resetGame();
+</script>
+</body>
+</html>
